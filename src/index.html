@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+    </style>
+
+    <title>Zika Outbreak</title>
+  </head>
+  <body>
+  <div id="toggle-buttons">
+    WMS Layer Toggles: 
+      <input type="button" id="toggle-population-layer" value="Toggle Population" />
+      <input type="button" id="toggle-freshwater-layer" value="Toggle Fresh Water Access" />
+      <input type="button" id="toggle-summermaxtemp-layer" value="Toggle Summer Max Temp" />
+    </div>
+    <div id="date-search">
+    Search by Date
+    <select id="search-date"></select>
+    <input type="button" id="search-by-date-button" value="Search by Date" />
+    </div>
+    <div id="date-range-search">
+    Date Range Search: 
+      <select id="start-date"></select>
+      <select id="end-date"></select>
+    <input type="button" id="get-report-layer" value="Date Range Search" />
+    </div>
+    <div id="case-operator-search">
+    Search by Case: Locations
+    <select id="search-operators"></select>
+    <input type="number" id="cases" min="0" max="500000" step="1"/> Cases
+    <input type="button" id="get-cases" value="Get Cases" />
+    </div>
+    <div>
+      <input type="button" id="clear" value="Clear Zika Reports" />
+    </div>
+    <div id="map"></div>
+  </body>
+</html>
