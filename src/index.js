@@ -25,6 +25,30 @@ import GreaterThan from "ol/format/filter/GreaterThan";
 import EqualTo from "ol/format/filter/EqualTo";
 import { operators } from "./search-operators";
 import LessThan from "ol/format/filter/LessThan";
+import { createTileWmsSource } from "./modules/source-utils";
+import { createWmsLayer } from "./modules/layer-utils";
+
+const populationDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['gpw-v4:gpw-v4-population-density-rev11_2015']);
+const populationDataLayer = createWmsLayer(true, .50, populationDataSource);
+
+const freshWaterDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['sdei:sdei-trends-freshwater-availability-grace']);
+const freshWaterDataLayer = createWmsLayer(true, .50, freshWaterDataSource);
+
+const summerDaytimeTempMaxSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['sdei:sdei-global-summer-lst-2013_day-max-global']);
+const summerDaytimeTempMaxLayer = createWmsLayer(true, .50, summerDaytimeTempMaxSource);
+
+let zikaLayer = new VectorLayer({
+    source: new VectorSource(),
+    style: new Style({
+        stroke: new Stroke({
+            color: 'white'
+        }),
+        fill: new Fill({
+            color: 'red'
+        })
+
+    })
+});
 
 const map = new Map({
     target: "map",
@@ -32,46 +56,14 @@ const map = new Map({
         zoom: 3,
         center: fromLonLat([-73.60791683207303, -15.595145902766419]),
     }),
-    layers: [new Tile({ source: new OSMSource() })],
+    layers: [
+        new Tile({ source: new OSMSource() }),
+        populationDataLayer,
+        freshWaterDataLayer,
+        summerDaytimeTempMaxLayer,
+        zikaLayer
+    ],
 });
-
-// creates a TileLayer from geoserver WMS request
-const populationDataLayer = new TileLayer({
-    visible: true,
-    opacity: .50,
-    source: new TileWMS({
-        url: SEDAC_GEOSERVER_URL,
-        projection: MAP_PROJECTION,
-        params: { layers: ['gpw-v4:gpw-v4-population-density-rev11_2015'] }
-    })
-})
-
-// creates a TileLayer from another geoserver WMS request (freshwater supply)
-const freshWaterDataLayer = new TileLayer({
-    visible: true,
-    opacity: .50,
-    source: new TileWMS({
-        url: SEDAC_GEOSERVER_URL,
-        projection: MAP_PROJECTION,
-        params: {
-            layers: ['sdei:sdei-trends-freshwater-availability-grace']
-        }
-    })
-})
-
-const cropLandsLayer = new TileLayer({
-    visible: true,
-    opacity: .50,
-    source: new TileWMS({
-        url: SEDAC_GEOSERVER_URL,
-        projection: MAP_PROJECTION,
-        params: {
-            layers: [
-                'gpw-v3:gpw-v3-population-density_2000'
-            ]
-        }
-    })
-})
 
 const featureRequest = new WFS().writeGetFeature({
     srsName: MAP_PROJECTION,
@@ -94,48 +86,16 @@ const featureRequest = new WFS().writeGetFeature({
     // ),
 })
 
-let vectorSource = new VectorSource();
-let zikaLayer = new VectorLayer({
-    source: vectorSource,
-    style: new Style({
-        stroke: new Stroke({
-            color: 'white'
-        }),
-        fill: new Fill({
-            color: 'red'
-        })
 
-    })
-});
 
 fetch('http://localhost:8080/geoserver/zika/wfs', {
     method: 'POST',
     body: new XMLSerializer().serializeToString(featureRequest)
 }).then(resp => resp.json()).then(data => {
+    const vectorSource = new VectorSource();
     vectorSource.addFeatures(new GeoJSON().readFeatures(data));
+    zikaLayer.setSource(vectorSource);
 })
-
-// creates a TileLayer from a geoserver WMS request
-const summerDaytimeTempMaxLayer = new TileLayer({
-    visible: true,
-    opacity: .50,
-    source: new TileWMS({
-        url: SEDAC_GEOSERVER_URL,
-        projection: MAP_PROJECTION,
-        params: {
-            layers: [
-                'sdei:sdei-global-summer-lst-2013_day-max-global'
-            ]
-        }
-    })
-});
-
-// adds the populationDataLayer to the map
-map.addLayer(populationDataLayer);
-map.addLayer(freshWaterDataLayer);
-map.addLayer(summerDaytimeTempMaxLayer);
-// map.addLayer(cropLandsLayer);
-map.addLayer(zikaLayer);
 
 // bind the toggle buttons to variables
 const togglePopButton = document.getElementById('toggle-population-layer');
@@ -172,7 +132,8 @@ const searchDateSelect = document.querySelector('#search-date');
 for (let i = 0; i < dates.length; i++) {
     const option = document.createElement("option");
     option.text = dates[i];
-    startDateSelect.add(option);
+    // startDateSelect.add(option);
+    startDateSelect.appendChild(option);
     //   endDateSelect.add(option);
     //   searchDateSelect.add(option);
 }
@@ -180,13 +141,13 @@ for (let i = 0; i < dates.length; i++) {
 for (const date of dates) {
     const option = document.createElement("option");
     option.text = date;
-    endDateSelect.add(option);
+    endDateSelect.appendChild(option);
 }
 
 for (const date of dates) {
     const option = document.createElement("option");
     option.text = date;
-    searchDateSelect.add(option);
+    searchDateSelect.appendChild(option);
 }
 
 const dateSearchRangeButton = document.querySelector("#get-report-layer");
