@@ -279,4 +279,6 @@ const validDates = [
 "2016-02-19"
 ]
 
+validDates.sort();
+
 export { validDates };

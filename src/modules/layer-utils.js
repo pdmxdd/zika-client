@@ -8,4 +8,8 @@ const createWmsLayer = (visible, opacity, source) => {
     })
 }
 
-export { createWmsLayer };
+const toggleLayerVisibility = (layer) => {
+    layer.setVisible(!layer.getVisible());
+}
+
+export { createWmsLayer, toggleLayerVisibility };

@@ -1,20 +1,12 @@
-// import in single expression
-// import { Map, View } from "ol";
-
-// import individually
-import "ol/ol.css"; // import openlayers CSS file
+import "ol/ol.css";
 
 import Map from "ol/Map";
 import View from "ol/View";
 import Tile from "ol/layer/Tile";
 import OSMSource from "ol/source/OSM";
-import { ImageWMS, Source, TileWMS, Vector } from "ol/source";
 import { MAP_PROJECTION, SEDAC_GEOSERVER_URL } from "./constants";
-import TileLayer from "ol/layer/Tile";
 import { fromLonLat } from "ol/proj";
-import { WFS, GeoJSON } from "ol/format";
 import IsBetween from "ol/src/format/filter/IsBetween";
-import TileSource from "ol/source/Tile";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
@@ -26,7 +18,10 @@ import EqualTo from "ol/format/filter/EqualTo";
 import { operators } from "./search-operators";
 import LessThan from "ol/format/filter/LessThan";
 import { createTileWmsSource } from "./modules/source-utils";
-import { createWmsLayer } from "./modules/layer-utils";
+import { createWmsLayer, toggleLayerVisibility } from "./modules/layer-utils";
+import { equalTo } from "ol/format/filter";
+import { wfsSourceFromFilter } from "./modules/wfsRequests";
+
 
 const populationDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['gpw-v4:gpw-v4-population-density-rev11_2015']);
 const populationDataLayer = createWmsLayer(true, .50, populationDataSource);
@@ -65,37 +60,8 @@ const map = new Map({
     ],
 });
 
-const featureRequest = new WFS().writeGetFeature({
-    srsName: MAP_PROJECTION,
-    featureNS: 'https://zika.devops.launchcode.org',
-    featurePrefix: 'zika',
-    featureTypes: ['locations_with_cases_by_date'],
-    outputFormat: 'application/json',
-    filter: new EqualTo(
-        "report_date",
-        "2015-11-28"
-    )
-    // filter: new GreaterThan(
-    //   "cases",
-    //   500
-    // )
-    // filter: new IsBetween(
-    //   "report_date",
-    //   "2015-01-01",
-    //   "2016-01-01"
-    // ),
-})
-
-
-
-fetch('http://localhost:8080/geoserver/zika/wfs', {
-    method: 'POST',
-    body: new XMLSerializer().serializeToString(featureRequest)
-}).then(resp => resp.json()).then(data => {
-    const vectorSource = new VectorSource();
-    vectorSource.addFeatures(new GeoJSON().readFeatures(data));
-    zikaLayer.setSource(vectorSource);
-})
+// get initial report data
+wfsSourceFromFilter(zikaLayer, equalTo("report_date", "2015-11-28"));
 
 // bind the toggle buttons to variables
 const togglePopButton = document.getElementById('toggle-population-layer');
@@ -106,115 +72,41 @@ const toggleSummerMaxButton = document.getElementById('toggle-summermaxtemp-laye
 
 // register a new eventlistener to the toggle
 togglePopButton.addEventListener('click', () => {
-    populationDataLayer.setVisible(!populationDataLayer.getVisible());
+    toggleLayerVisibility(populationDataLayer);
 })
 
 toggleWaterButton.addEventListener('click', () => {
-    freshWaterDataLayer.setVisible(
-        !freshWaterDataLayer.getVisible()
-    );
+    toggleLayerVisibility(freshWaterDataLayer);
 })
 
 toggleSummerMaxButton.addEventListener('click', () => {
-    summerDaytimeTempMaxLayer.setVisible(
-        !summerDaytimeTempMaxLayer.getVisible()
-    );
+    toggleLayerVisibility(summerDaytimeTempMaxLayer);
 })
-
-const dates = validDates;
-
-dates.sort();
 
 const startDateSelect = document.querySelector("#start-date");
 const endDateSelect = document.querySelector("#end-date");
 const searchDateSelect = document.querySelector('#search-date');
 
-for (let i = 0; i < dates.length; i++) {
-    const option = document.createElement("option");
-    option.text = dates[i];
-    // startDateSelect.add(option);
-    startDateSelect.appendChild(option);
-    //   endDateSelect.add(option);
-    //   searchDateSelect.add(option);
-}
+const dateSelects = [startDateSelect, endDateSelect, searchDateSelect];
 
-for (const date of dates) {
-    const option = document.createElement("option");
-    option.text = date;
-    endDateSelect.appendChild(option);
-}
-
-for (const date of dates) {
-    const option = document.createElement("option");
-    option.text = date;
-    searchDateSelect.appendChild(option);
+for (const date of validDates) {
+    for(const dateSelect of dateSelects) {
+        const option = document.createElement("option");
+        option.text = date;
+        dateSelect.appendChild(option);
+    }
 }
 
 const dateSearchRangeButton = document.querySelector("#get-report-layer");
 
 dateSearchRangeButton.addEventListener('click', () => {
-    const featureRequest = new WFS().writeGetFeature({
-        srsName: MAP_PROJECTION,
-        featureNS: 'https://zika.devops.launchcode.org',
-        featurePrefix: 'zika',
-        featureTypes: ['locations_with_cases_by_date'],
-        outputFormat: 'application/json',
-        // filter: new EqualTo(
-        //   "report_date",
-        //   "2015-11-28"
-        // )
-        // filter: new GreaterThan(
-        //   "cases",
-        //   500
-        // )
-        filter: new IsBetween(
-            "report_date",
-            startDateSelect.value,
-            endDateSelect.value
-        ),
-    })
-    fetch('http://localhost:8080/geoserver/zika/wfs', {
-        method: 'POST',
-        body: new XMLSerializer().serializeToString(featureRequest)
-    }).then(resp => resp.json()).then(data => {
-        let newSource = new VectorSource();
-        newSource.addFeatures(new GeoJSON().readFeatures(data));
-        zikaLayer.setSource(newSource);
-    })
-
+    wfsSourceFromFilter(zikaLayer, new IsBetween("report_date", startDateSelect.value, endDateSelect.value));
 })
 
 const dateSearchButton = document.querySelector("#search-by-date-button");
 
 dateSearchButton.addEventListener('click', () => {
-    const featureRequest = new WFS().writeGetFeature({
-        srsName: MAP_PROJECTION,
-        featureNS: 'https://zika.devops.launchcode.org',
-        featurePrefix: 'zika',
-        featureTypes: ['locations_with_cases_by_date'],
-        outputFormat: 'application/json',
-        // filter: new EqualTo(
-        //   "report_date",
-        //   "2015-11-28"
-        // )
-        // filter: new GreaterThan(
-        //   "cases",
-        //   500
-        // )
-        filter: new EqualTo(
-            "report_date",
-            searchDateSelect.value
-        ),
-    })
-
-    fetch('http://localhost:8080/geoserver/zika/wfs', {
-        method: 'POST',
-        body: new XMLSerializer().serializeToString(featureRequest)
-    }).then(resp => resp.json()).then(data => {
-        let newSource = new VectorSource();
-        newSource.addFeatures(new GeoJSON().readFeatures(data));
-        zikaLayer.setSource(newSource);
-    })
+    wfsSourceFromFilter(zikaLayer, equalTo("report_date", searchDateSelect.value));
 })
 
 const operatorSelect = document.querySelector("#search-operators");
@@ -222,60 +114,35 @@ const operatorSelect = document.querySelector("#search-operators");
 for (const operator in operators) {
     const option = document.createElement("option");
     option.text = operator;
-    operatorSelect.add(option);
+    operatorSelect.appendChild(option);
 }
 
 const getCasesButton = document.querySelector("#get-cases");
 
 getCasesButton.addEventListener("click", () => {
     let filterSelection;
-    if(operatorSelect.value === ">") {
+    const numOfCases = document.querySelector("#cases").value;
+    const selectOperator = operatorSelect.value;
+    if(selectOperator === ">") {
         filterSelection = new GreaterThan(
             "cases",
-            document.querySelector("#cases").value
+            numOfCases
         )
     }
-    else if(operatorSelect.value === "<") {
+    else if(selectOperator === "<") {
         filterSelection = new LessThan(
             "cases",
-            document.querySelector("#cases").value
+            numOfCases
         )
     }
-    else if(operatorSelect.value === "==") {
+    else if(selectOperator === "==") {
         filterSelection = new EqualTo(
             "cases",
-            document.querySelector('#cases').value
+            numOfCases
         )
     }
-    const featureRequest = new WFS().writeGetFeature({
-        srsName: MAP_PROJECTION,
-        featureNS: 'https://zika.devops.launchcode.org',
-        featurePrefix: 'zika',
-        featureTypes: ['locations_with_cases_by_date'],
-        outputFormat: 'application/json',
-        // filter: new EqualTo(
-        //   "report_date",
-        //   "2015-11-28"
-        // )
-        // filter: new GreaterThan(
-        //   "cases",
-        //   document.querySelector("#cases").value
-        // )
-        // filter: new EqualTo(
-        //     "report_date",
-        //     searchDateSelect.value
-        // ),
-        filter: filterSelection
-    })
-
-    fetch('http://localhost:8080/geoserver/zika/wfs', {
-        method: 'POST',
-        body: new XMLSerializer().serializeToString(featureRequest)
-    }).then(resp => resp.json()).then(data => {
-        let newSource = new VectorSource();
-        newSource.addFeatures(new GeoJSON().readFeatures(data));
-        zikaLayer.setSource(newSource);
-    })
+    wfsSourceFromFilter(zikaLayer, filterSelection);
+    
 })
 
 const clearButton = document.querySelector("#clear");
