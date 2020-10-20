@@ -1,4 +1,4 @@
-const { toggleLayerVisibility } = require("./layer-utils")
+import { toggleLayerVisibility } from "./layer-utils";
 
 const registerToggleClick = (button, layer) => {
     button.addEventListener('click', () => {

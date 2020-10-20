@@ -1,4 +1,4 @@
-const { default: TileLayer } = require("ol/layer/Tile")
+import TileLayer from "ol/layer/Tile";
 
 const createWmsLayer = (visible, opacity, source) => {
     return new TileLayer({

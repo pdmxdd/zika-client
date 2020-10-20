@@ -1,6 +1,6 @@
 import { WFS, GeoJSON } from "ol/format";
 import VectorSource from "ol/source/Vector";
-import { MAP_PROJECTION } from "../constants";
+import { MAP_PROJECTION } from "./constants";
 
 const wfsFetch = async (featureRequest) => {
     const fetchResponse = await fetch('http://localhost:8080/geoserver/zika/wfs', {

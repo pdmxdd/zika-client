@@ -1,5 +1,5 @@
-const { validDates } = require("../valid-dates")
-import { operators } from "../search-operators"
+import { validDates } from "./valid-dates";
+import { operators } from "./search-operators";
 
 const setupDateSelects = (dateSelects) => {
     for (const date of validDates) {

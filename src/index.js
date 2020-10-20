@@ -4,7 +4,7 @@ import Map from "ol/Map";
 import View from "ol/View";
 import Tile from "ol/layer/Tile";
 import OSMSource from "ol/source/OSM";
-import { MAP_PROJECTION, SEDAC_GEOSERVER_URL } from "./constants";
+import { MAP_PROJECTION, SEDAC_GEOSERVER_URL } from "./modules/constants";
 import { fromLonLat } from "ol/proj";
 import IsBetween from "ol/src/format/filter/IsBetween";
 import VectorSource from "ol/source/Vector";
