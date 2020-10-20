@@ -19,8 +19,9 @@ import { operators } from "./search-operators";
 import LessThan from "ol/format/filter/LessThan";
 import { createTileWmsSource } from "./modules/source-utils";
 import { createWmsLayer, toggleLayerVisibility } from "./modules/layer-utils";
-import { equalTo } from "ol/format/filter";
+import { equalTo, greaterThan, lessThan } from "ol/format/filter";
 import { wfsSourceFromFilter } from "./modules/wfsRequests";
+import registerToggleClick from "./modules/toggle-button-utils";
 
 
 const populationDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['gpw-v4:gpw-v4-population-density-rev11_2015']);
@@ -64,24 +65,9 @@ const map = new Map({
 wfsSourceFromFilter(zikaLayer, equalTo("report_date", "2015-11-28"));
 
 // bind the toggle buttons to variables
-const togglePopButton = document.getElementById('toggle-population-layer');
-
-const toggleWaterButton = document.getElementById('toggle-freshwater-layer');
-
-const toggleSummerMaxButton = document.getElementById('toggle-summermaxtemp-layer');
-
-// register a new eventlistener to the toggle
-togglePopButton.addEventListener('click', () => {
-    toggleLayerVisibility(populationDataLayer);
-})
-
-toggleWaterButton.addEventListener('click', () => {
-    toggleLayerVisibility(freshWaterDataLayer);
-})
-
-toggleSummerMaxButton.addEventListener('click', () => {
-    toggleLayerVisibility(summerDaytimeTempMaxLayer);
-})
+registerToggleClick(document.querySelector("#toggle-population-layer"), populationDataLayer);
+registerToggleClick(document.querySelector("#toggle-freshwater-layer"), freshWaterDataLayer);
+registerToggleClick(document.querySelector("#toggle-summermaxtemp-layer"), summerDaytimeTempMaxLayer);
 
 const startDateSelect = document.querySelector("#start-date");
 const endDateSelect = document.querySelector("#end-date");
@@ -124,22 +110,13 @@ getCasesButton.addEventListener("click", () => {
     const numOfCases = document.querySelector("#cases").value;
     const selectOperator = operatorSelect.value;
     if(selectOperator === ">") {
-        filterSelection = new GreaterThan(
-            "cases",
-            numOfCases
-        )
+        filterSelection = greaterThan("cases", numOfCases);
     }
     else if(selectOperator === "<") {
-        filterSelection = new LessThan(
-            "cases",
-            numOfCases
-        )
+        filterSelection = lessThan("cases", numOfCases);
     }
     else if(selectOperator === "==") {
-        filterSelection = new EqualTo(
-            "cases",
-            numOfCases
-        )
+        filterSelection = equalTo("cases", numOfCases);
     }
     wfsSourceFromFilter(zikaLayer, filterSelection);
     
