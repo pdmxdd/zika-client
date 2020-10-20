@@ -12,16 +12,12 @@ import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
-import { validDates } from "./valid-dates";
-import GreaterThan from "ol/format/filter/GreaterThan";
-import EqualTo from "ol/format/filter/EqualTo";
-import { operators } from "./search-operators";
-import LessThan from "ol/format/filter/LessThan";
 import { createTileWmsSource } from "./modules/source-utils";
-import { createWmsLayer, toggleLayerVisibility } from "./modules/layer-utils";
+import { createWmsLayer } from "./modules/layer-utils";
 import { equalTo, greaterThan, lessThan } from "ol/format/filter";
 import { wfsSourceFromFilter } from "./modules/wfsRequests";
 import registerToggleClick from "./modules/toggle-button-utils";
+import { setupDateSelects, setupOperatorSelect } from "./modules/dom-setup";
 
 
 const populationDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['gpw-v4:gpw-v4-population-density-rev11_2015']);
@@ -64,7 +60,6 @@ const map = new Map({
 // get initial report data
 wfsSourceFromFilter(zikaLayer, equalTo("report_date", "2015-11-28"));
 
-// bind the toggle buttons to variables
 registerToggleClick(document.querySelector("#toggle-population-layer"), populationDataLayer);
 registerToggleClick(document.querySelector("#toggle-freshwater-layer"), freshWaterDataLayer);
 registerToggleClick(document.querySelector("#toggle-summermaxtemp-layer"), summerDaytimeTempMaxLayer);
@@ -73,15 +68,11 @@ const startDateSelect = document.querySelector("#start-date");
 const endDateSelect = document.querySelector("#end-date");
 const searchDateSelect = document.querySelector('#search-date');
 
-const dateSelects = [startDateSelect, endDateSelect, searchDateSelect];
-
-for (const date of validDates) {
-    for(const dateSelect of dateSelects) {
-        const option = document.createElement("option");
-        option.text = date;
-        dateSelect.appendChild(option);
-    }
-}
+setupDateSelects([
+    startDateSelect,
+    endDateSelect,
+    searchDateSelect
+]);
 
 const dateSearchRangeButton = document.querySelector("#get-report-layer");
 
@@ -97,11 +88,7 @@ dateSearchButton.addEventListener('click', () => {
 
 const operatorSelect = document.querySelector("#search-operators");
 
-for (const operator in operators) {
-    const option = document.createElement("option");
-    option.text = operator;
-    operatorSelect.appendChild(option);
-}
+setupOperatorSelect(operatorSelect);
 
 const getCasesButton = document.querySelector("#get-cases");
 
