@@ -70,13 +70,13 @@ setupDateSelects([
 const dateSearchRangeButton = document.querySelector("#get-report-layer");
 
 dateSearchRangeButton.addEventListener('click', () => {
-    wfsSourceFromFilter(zikaLayer, new IsBetween("report_date", startDateSelect.value, endDateSelect.value));
+    wfsSourceFromFilter(zikaLayer, new IsBetween("report_date", startDateSelect["value"], endDateSelect["value"]));
 })
 
 const dateSearchButton = document.querySelector("#search-by-date-button");
 
 dateSearchButton.addEventListener('click', () => {
-    wfsSourceFromFilter(zikaLayer, equalTo("report_date", searchDateSelect.value));
+    wfsSourceFromFilter(zikaLayer, equalTo("report_date", searchDateSelect["value"]));
 })
 
 const operatorSelect = document.querySelector("#search-operators");
@@ -87,8 +87,8 @@ const getCasesButton = document.querySelector("#get-cases");
 
 getCasesButton.addEventListener("click", () => {
     let filterSelection;
-    const numOfCases = document.querySelector("#cases").value;
-    const selectOperator = operatorSelect.value;
+    const numOfCases = document.querySelector("#cases")["value"];
+    const selectOperator = operatorSelect["value"];
     if(selectOperator === ">") {
         filterSelection = greaterThan("cases", numOfCases);
     }
