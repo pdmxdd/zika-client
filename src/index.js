@@ -4,7 +4,6 @@ import Map from "ol/Map";
 import View from "ol/View";
 import Tile from "ol/layer/Tile";
 import OSMSource from "ol/source/OSM";
-import { MAP_PROJECTION, SEDAC_GEOSERVER_URL } from "./modules/constants";
 import { fromLonLat } from "ol/proj";
 import IsBetween from "ol/src/format/filter/IsBetween";
 import VectorSource from "ol/source/Vector";
@@ -12,22 +11,16 @@ import VectorLayer from "ol/layer/Vector";
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
-import { createTileWmsSource } from "./modules/source-utils";
-import { createWmsLayer } from "./modules/layer-utils";
 import { equalTo, greaterThan, lessThan } from "ol/format/filter";
 import { wfsSourceFromFilter } from "./modules/wfsRequests";
 import registerToggleClick from "./modules/toggle-button-utils";
 import { setupDateSelects, setupOperatorSelect } from "./modules/dom-setup";
+import { createWmsLayer } from "./modules/wms-utils";
 
 
-const populationDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['gpw-v4:gpw-v4-population-density-rev11_2015']);
-const populationDataLayer = createWmsLayer(true, .50, populationDataSource);
-
-const freshWaterDataSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['sdei:sdei-trends-freshwater-availability-grace']);
-const freshWaterDataLayer = createWmsLayer(true, .50, freshWaterDataSource);
-
-const summerDaytimeTempMaxSource = createTileWmsSource(SEDAC_GEOSERVER_URL, MAP_PROJECTION, ['sdei:sdei-global-summer-lst-2013_day-max-global']);
-const summerDaytimeTempMaxLayer = createWmsLayer(true, .50, summerDaytimeTempMaxSource);
+const populationDataLayer = createWmsLayer(['gpw-v4:gpw-v4-population-density-rev11_2015']);
+const freshWaterDataLayer = createWmsLayer(['sdei:sdei-trends-freshwater-availability-grace']);
+const summerDaytimeTempMaxLayer = createWmsLayer(['sdei:sdei-global-summer-lst-2013_day-max-global']);
 
 let zikaLayer = new VectorLayer({
     source: new VectorSource(),
