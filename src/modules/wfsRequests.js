@@ -3,7 +3,7 @@ import VectorSource from "ol/source/Vector";
 import { MAP_PROJECTION } from "./constants";
 
 const wfsFetch = async (featureRequest) => {
-    const fetchResponse = await fetch('http://localhost:8080/geoserver/zika/wfs', {
+    const fetchResponse = await fetch('http://3.235.104.158:8080/geoserver/zika/wfs', {
         method: 'POST',
         body: new XMLSerializer().serializeToString(featureRequest)
     })

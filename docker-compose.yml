@@ -13,3 +13,9 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+  mapnotes-api:
+    container_name: "zika-mapnotes-api"
+    image: "launchcodedevops/mapnotes-api-node"
+    ports:
+      - "8008:8008"
+

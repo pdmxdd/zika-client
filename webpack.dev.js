@@ -1,5 +1,4 @@
 // dev config: common config + dev environment configuration
-
 const { merge } = require("webpack-merge"); // merge webpack configs
 const commonConfig = require("./webpack.common"); // import the common config file
 const { HotModuleReplacementPlugin } = require("webpack");
@@ -38,5 +37,7 @@ module.exports = merge(commonConfig, {
   },
 
   // plugin for implementing HMR
-  plugins: [new HotModuleReplacementPlugin()],
+  plugins: [
+    new HotModuleReplacementPlugin(),
+  ],
 });

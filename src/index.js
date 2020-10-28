@@ -16,7 +16,8 @@ import { wfsSourceFromFilter } from "./modules/wfsRequests";
 import registerToggleClick from "./modules/toggle-button-utils";
 import { setupDateSelects, setupOperatorSelect } from "./modules/dom-setup";
 import { createWmsLayer } from "./modules/wms-utils";
-
+import { AK } from "./modules/constants";
+import { initializeMapNotes } from "./modules/mapnotes";
 
 const populationDataLayer = createWmsLayer(['gpw-v4:gpw-v4-population-density-rev11_2015']);
 const freshWaterDataLayer = createWmsLayer(['sdei:sdei-trends-freshwater-availability-grace']);
@@ -42,12 +43,18 @@ const map = new Map({
         center: fromLonLat([-73.60791683207303, -15.595145902766419]),
     }),
     layers: [
-        new Tile({ source: new OSMSource() }),
+        new Tile({ source: new OSMSource({ url: 'https://tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=' + AK }) }),
         populationDataLayer,
         freshWaterDataLayer,
         summerDaytimeTempMaxLayer,
         zikaLayer
     ],
+});
+
+initializeMapNotes({
+    map,
+    notesManagerTargetId: "mapnotes-manager",
+    activeNoteTargetId: "mapnotes-active-note"
 });
 
 // get initial report data
@@ -89,17 +96,17 @@ getCasesButton.addEventListener("click", () => {
     let filterSelection;
     const numOfCases = document.querySelector("#cases")["value"];
     const selectOperator = operatorSelect["value"];
-    if(selectOperator === ">") {
+    if (selectOperator === ">") {
         filterSelection = greaterThan("cases", numOfCases);
     }
-    else if(selectOperator === "<") {
+    else if (selectOperator === "<") {
         filterSelection = lessThan("cases", numOfCases);
     }
-    else if(selectOperator === "==") {
+    else if (selectOperator === "==") {
         filterSelection = equalTo("cases", numOfCases);
     }
     wfsSourceFromFilter(zikaLayer, filterSelection);
-    
+
 })
 
 const clearButton = document.querySelector("#clear");

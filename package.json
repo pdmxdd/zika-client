@@ -13,7 +13,15 @@
     "prestart:services": "npm run install:geoserver-config",
     "prestop:services": "npm run install:geoserver-config",
     "start:services": "docker-compose -f docker-compose.yml -f ./geoserver-config/docker-compose.preconfigured.yml up -d",
-    "stop:services": "docker-compose  -f docker-compose.yml -f ./geoserver-config/docker-compose.preconfigured.yml down"
+    "stop:services": "docker-compose  -f docker-compose.yml -f ./geoserver-config/docker-compose.preconfigured.yml down",
+    "predeploy": "npm run build",
+    "deploy": "aws s3 sync --acl public-read dist/ s3://launchcode-gisdevops-c7-paul2-zika-client",
+    "map-notes:primary-objectives": "git clone -b primary-objectives-starter https://gitlab.com/LaunchCodeTraining/zika-project/mapnotes src/modules/mapnotes",
+    "map-notes:generic-components": "git clone -b generic-components-starter https://gitlab.com/LaunchCodeTraining/zika-project/mapnotes src/modules/mapnotes",
+    "map-notes:blank": "git clone -b blank-starter https://gitlab.com/LaunchCodeTraining/zika-project/mapnotes src/modules/mapnotes",
+    "postmap-notes:primary-objectives": "rm -rf src/modules/mapnotes/.git",
+    "postmap-notes:generic-components": "rm -rf src/modules/mapnotes/.git",
+    "postmap-notes:blank": "rm -rf src/modules/mapnotes/.git"
   },
   "repository": {
     "type": "git",
@@ -28,6 +36,7 @@
     "@types/webpack": "^4.41.22",
     "@types/webpack-dev-server": "^3.11.0",
     "css-loader": "^4.3.0",
+    "dotenv-webpack": "^4.0.0",
     "html-webpack-plugin": "^4.5.0",
     "source-map-loader": "^1.1.1",
     "style-loader": "^2.0.0",
